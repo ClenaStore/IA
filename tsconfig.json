@@ -1,7 +1,13 @@
 {
   "compilerOptions": {
-    "target":"ES2022","module":"ESNext","moduleResolution":"node",
-    "strict":true,"skipLibCheck":true,"resolveJsonModule":true,"noEmit":true
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": false,
+    "outDir": "dist"
   },
-  "include":["api/**/*"]
+  "include": ["api/**/*.ts"]
 }
