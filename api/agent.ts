@@ -1,18 +1,18 @@
-export const config = { runtime: "edge" };
+export const config = { runtime: 'edge' };
 
-function json(data: any, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
-}
-
-export default async function handler(request: Request) {
+export default async function handler(req: Request) {
   try {
-    const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
-    const q = body.q || new URL(request.url).searchParams.get("q") || "ping";
-    return json({ ok: true, echo: q });
-  } catch (e: any) {
-    return json({ ok: false, error: String(e?.message || e) }, 500);
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get('q') || 'ping';
+
+    return new Response(
+      JSON.stringify({ ok: true, echo: q }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ ok: false, error: err?.message || String(err) }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
