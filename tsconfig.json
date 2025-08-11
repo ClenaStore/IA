@@ -8,7 +8,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": [
-    "api/**/*"
-  ]
+  "include": ["api/**/*"]
 }
