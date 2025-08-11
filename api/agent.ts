@@ -9,7 +9,8 @@ function json(data: any, status = 200) {
 
 export default async function handler(request: Request) {
   try {
-    const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
+    const body =
+      request.method === "POST" ? await request.json().catch(() => ({})) : {};
     const q = body.q || new URL(request.url).searchParams.get("q") || "ping";
     return json({ ok: true, echo: q });
   } catch (e: any) {
