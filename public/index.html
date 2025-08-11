@@ -3,36 +3,72 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Agente DV • OpenAI</title>
+  <title>Chat • Agente DV</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#0b1220; color:#e5e7eb; margin:0; padding:20px }
-    h1 { color:#0ea5e9 }
-    form { display:flex; gap:8px; margin-bottom:16px }
-    input { flex:1; padding:10px; border-radius:8px; border:1px solid #374151; background:#111827; color:#e5e7eb }
-    button { padding:10px 16px; background:#0ea5e9; color:#0b1220; border:0; border-radius:8px; font-weight:700; cursor:pointer }
-    pre { white-space:pre-wrap; background:#111827; border-radius:8px; padding:12px; }
+    :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--txt:#e5e7eb;--acc:#0ea5e9}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Arial,sans-serif}
+    header{position:sticky;top:0;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);padding:14px 18px;border-bottom:1px solid #1f2937}
+    header h1{margin:0;font-size:18px}
+    main{max-width:900px;margin:0 auto;padding:16px}
+    #log{display:flex;flex-direction:column;gap:10px;margin-bottom:92px}
+    .msg{padding:12px 14px;border:1px solid #1f2937;border-radius:14px;max-width:75%;background:var(--panel);line-height:1.35}
+    .me{align-self:flex-end;background:#0b2540;border-color:#143955}
+    .ai{align-self:flex-start}
+    .meta{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+    form{position:fixed;left:0;right:0;bottom:0;background:rgba(15,23,42,.9);backdrop-filter:blur(6px);padding:12px;border-top:1px solid #1f2937}
+    .bar{max-width:900px;margin:0 auto;display:flex;gap:8px}
+    input{flex:1;padding:12px;border-radius:12px;border:1px solid #334155;background:#0b1220;color:var(--txt)}
+    button{padding:12px 16px;border-radius:12px;border:0;background:var(--acc);color:#001422;font-weight:700;cursor:pointer}
+    .loading{color:var(--muted);font-style:italic}
   </style>
 </head>
 <body>
-  <h1>Agente DV • OpenAI</h1>
+  <header><h1>Agente DV</h1></header>
+  <main>
+    <div id="log"></div>
+  </main>
+
   <form id="chat">
-    <input id="q" placeholder="Pergunte algo..." />
-    <button>Enviar</button>
+    <div class="bar">
+      <input id="q" placeholder="Escreva sua mensagem..." autocomplete="off" />
+      <button>Enviar</button>
+    </div>
   </form>
-  <pre id="out">Pronto para conversar...</pre>
 
   <script>
-    document.getElementById("chat").addEventListener("submit", async (e) => {
+    const log = document.getElementById('log');
+    const form = document.getElementById('chat');
+    const q = document.getElementById('q');
+
+    function add(role, text){
+      const div = document.createElement('div');
+      div.className = 'msg ' + (role === 'user' ? 'me' : 'ai');
+      div.innerHTML = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,'<br>');
+      log.appendChild(div);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      return div;
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const q = document.getElementById("q").value;
-      document.getElementById("out").textContent = "Carregando...";
-      const r = await fetch("/api/agent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q })
-      });
-      const data = await r.json();
-      document.getElementById("out").textContent = data.resposta || "Erro!";
+      const text = q.value.trim();
+      if(!text) return;
+      q.value = '';
+      add('user', text);
+      const wait = add('assistant', '<span class="loading">pensando…</span>');
+
+      try {
+        const r = await fetch('/api/agent', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          body: JSON.stringify({ q: text })
+        });
+        const data = await r.json();
+        wait.innerHTML = (data.text || data.resposta || JSON.stringify(data, null, 2))
+          .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,'<br>');
+      } catch (err) {
+        wait.innerHTML = `<span class="loading">erro: ${String(err)}</span>`;
+      }
     });
   </script>
 </body>
