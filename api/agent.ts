@@ -1,24 +1,31 @@
 import OpenAI from "openai";
 
-export default async function handler(req: any, res: any) {
+export const config = { runtime: "edge" };
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export default async function handler(request: Request) {
   try {
-    const body = req.method === "POST" ? req.body : {};
-    const prompt = body.q || "Olá, quem é você?";
+    const isPost = request.method === "POST";
+    const body = isPost ? await request.json().catch(() => ({})) : {};
+    const url = new URL(request.url);
+    const q = body.q || url.searchParams.get("q") || "Diga olá.";
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+    const resp = await client.responses.create({
+      model: "gpt-5",
+      input: [
+        { role: "system", content: "Você é um agente do Grupo DV. Responda em PT-BR, direto ao ponto." },
+        { role: "user", content: q }
+      ]
     });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }]
-    });
-
-    res.status(200).json({
-      ok: true,
-      resposta: completion.choices[0].message.content
-    });
-  } catch (error) {
-    res.status(500).json({ ok: false, erro: String(error) });
+    const text = (resp as any).output_text ?? JSON.stringify(resp);
+    return json({ ok: true, text });
+  } catch (err: any) {
+    return json({ ok: false, error: String(err?.message || err) }, 500);
   }
+}
+
+function json(obj: any, status = 200) {
+  return new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json" } });
 }
