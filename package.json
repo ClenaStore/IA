@@ -1,4 +1,10 @@
 {
-  "name": "agente-dv-static",
-  "private": true
+  "name": "agente-dv-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "",
+    "start": "vercel dev"
+  }
 }
