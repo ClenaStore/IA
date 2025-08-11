@@ -1,13 +1,6 @@
-export const config = {
-  runtime: "edge"
-};
+// api/agent.ts
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default async function handler(req: Request) {
-  return new Response(
-    JSON.stringify({ ok: true, message: "API funcionando 🚀" }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    }
-  );
+export default function handler(req: VercelRequest, res: VercelResponse) {
+  res.status(200).json({ status: "ok", message: "API funcionando 🚀" });
 }
