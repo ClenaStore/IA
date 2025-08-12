@@ -2,6 +2,6 @@
   "version": 2,
   "builds": [
     { "src": "api/agent.js", "use": "@vercel/node" },
-    { "src": "public/**", "use": "@vercel/static" }
+    { "src": "public/**/*", "use": "@vercel/static" }
   ]
 }
