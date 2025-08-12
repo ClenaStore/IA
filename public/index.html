@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agente DV</title>
+  <style>
+    body { background-color: #0f172a; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    input { padding: 10px; width: 300px; border-radius: 5px; border: none; }
+    button { padding: 10px 20px; background: #0284c7; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    pre { background: #1e293b; padding: 15px; border-radius: 5px; text-align: left; max-width: 600px; margin: 20px auto; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Agente DV</h1>
+  <input id="pergunta" placeholder="Digite algo..." />
+  <button onclick="enviar()">Enviar</button>
+  <pre id="resposta"></pre>
+
+  <script>
+    async function enviar(){
+      const q = document.getElementById('pergunta').value;
+      const resposta = document.getElementById('resposta');
+      try {
+        const r = await fetch(`/api/agent?q=${encodeURIComponent(q)}`);
+        const dados = await r.json();
+        resposta.textContent = JSON.stringify(dados, null, 2);
+      } catch(e) {
+        resposta.textContent = "Erro: " + e;
+      }
+    }
+  </script>
+</body>
+</html>
