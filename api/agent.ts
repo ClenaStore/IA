@@ -1,32 +1,21 @@
-// api/agent.ts
 import { Configuration, OpenAIApi } from "openai";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default async function handler(req, res) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method !== "POST") {
       return res.status(405).json({ ok: false, error: "Método não permitido" });
     }
 
-    const body = await new Promise((resolve, reject) => {
-      let data = "";
-      req.on("data", (chunk) => (data += chunk));
-      req.on("end", () => {
-        try {
-          resolve(JSON.parse(data || "{}"));
-        } catch (err) {
-          reject(err);
-        }
-      });
-    });
-
-    const { q } = body as { q?: string };
+    const { q } = req.body || {};
     if (!q) {
       return res.status(400).json({ ok: false, error: "Pergunta vazia" });
     }
 
-    // Configuração OpenAI usando variável de ambiente
     const openai = new OpenAIApi(
-      new Configuration({ apiKey: process.env.OPENAI_API_KEY })
+      new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+      })
     );
 
     const completion = await openai.createChatCompletion({
