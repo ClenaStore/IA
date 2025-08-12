@@ -1,12 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agente DV</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agente DV</title>
+<style>
+  body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    text-align: center;
+  }
+  input, button {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+  }
+  input {
+    width: 250px;
+  }
+  button {
+    background: #0284c7;
+    color: white;
+    cursor: pointer;
+  }
+  .resposta {
+    margin-top: 20px;
+    padding: 10px;
+    background: #1e293b;
+    border-radius: 6px;
+  }
+</style>
 </head>
 <body>
   <h1>Agente DV</h1>
-  <p>Testar API: <a href="/api/agent?q=ping" target="_blank">Clique aqui</a></p>
+  <input id="pergunta" type="text" placeholder="Digite sua pergunta..." />
+  <button onclick="enviar()">Enviar</button>
+  <div id="saida" class="resposta"></div>
+
+  <script>
+    async function enviar() {
+      const pergunta = document.getElementById("pergunta").value.trim();
+      if (!pergunta) {
+        document.getElementById("saida").innerText = "Digite algo!";
+        return;
+      }
+
+      document.getElementById("saida").innerText = "Carregando...";
+
+      try {
+        const resp = await fetch(`/api/agent?q=${encodeURIComponent(pergunta)}`);
+        const dados = await resp.json();
+        document.getElementById("saida").innerText = JSON.stringify(dados, null, 2);
+      } catch (erro) {
+        document.getElementById("saida").innerText = "Erro: " + erro;
+      }
+    }
+  </script>
 </body>
 </html>
