@@ -64,7 +64,7 @@
           body: JSON.stringify({ q: text })
         });
         const data = await r.json();
-        wait.innerHTML = (data.text || data.resposta || JSON.stringify(data, null, 2))
+        wait.innerHTML = (data.resposta || data.text || JSON.stringify(data))
           .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,'<br>');
       } catch (err) {
         wait.innerHTML = `<span class="loading">erro: ${String(err)}</span>`;
