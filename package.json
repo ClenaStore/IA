@@ -10,6 +10,10 @@
   "dependencies": {
     "openai": "^4.67.2"
   },
+  "devDependencies": {
+    "@vercel/node": "^3.0.7",
+    "typescript": "^5.4.5"
+  },
   "engines": {
     "node": ">=18"
   }
