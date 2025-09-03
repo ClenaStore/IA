@@ -1,26 +1,29 @@
-// pages/api/ask.js  (Next.js App Router antigo)
-// ou em app/api/ask/route.js se estiver usando App Router novo
+// pages/api/ask.js  — Next.js (Pages Router)
 
 export default async function handler(req, res) {
+  // 1) Ping para o botão "Testar conexão"
+  if (req.method === "GET") {
+    if (req.query.ping === "1") return res.status(200).send("ok");
+    return res.status(405).json({ error: "Use POST em /api/ask" });
+  }
+
   if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
+    res.setHeader("Allow", ["GET", "POST"]);
     return res.status(405).json({ error: "Método não permitido" });
   }
 
   try {
-    const { model, messages, tools, url } = req.body;
-
-    // Carrega chave da OpenAI da Vercel
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "OPENAI_API_KEY não configurada" });
     }
 
-    // Conexão com API da OpenAI (streaming)
+    const { model, messages } = req.body || {};
+
     const upstream = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -35,7 +38,7 @@ export default async function handler(req, res) {
       return res.status(upstream.status).send(err);
     }
 
-    // Prepara streaming SSE
+    // SSE
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("Connection", "keep-alive");
@@ -46,19 +49,15 @@ export default async function handler(req, res) {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
       const chunk = decoder.decode(value, { stream: true });
-
-      // repassa cada linha SSE da OpenAI para o cliente
+      // repassa as linhas SSE
       const lines = chunk.split("\n").filter(Boolean);
       for (const line of lines) {
-        if (line.startsWith("data:")) {
-          res.write(line + "\n\n");
-        }
+        if (line.startsWith("data:")) res.write(line + "\n\n");
       }
     }
 
-    res.write("data: {\"type\":\"done\"}\n\n");
+    res.write('data: {"type":"done"}\n\n');
     res.end();
   } catch (err) {
     console.error("Erro API ask:", err);
