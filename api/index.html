@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IA • Nexus Web</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0c0a13; --panel:#121225; --mut:#cbc7d9; --ink:#ffffff;
+      --line:#262646; --brand:#8b5cf6; --brand-2:#22d3ee; --ok:#16a34a; --warn:#f59e0b; --danger:#ef4444;
+      --card:#17172b; --chip:#1f1f36; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;background:radial-gradient(1200px 800px at 75% -100px, rgba(139,92,246,.12), transparent 60%),radial-gradient(1000px 700px at -20% -80px, rgba(34,211,238,.10), transparent 50%), var(--bg); color:var(--ink)}
+    a{color:inherit}
+
+    .app{display:grid; grid-template-columns: 280px 1fr; height:100vh}
+    .sidebar{border-right:1px solid var(--line); background:linear-gradient(180deg, rgba(23,23,43,.65), rgba(18,18,37,.9)); padding:18px; display:flex; flex-direction:column; gap:18px}
+    .logo{display:flex; align-items:center; gap:10px}
+    .logo .mark{width:34px;height:34px; border-radius:10px; background:linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow:0 6px 20px rgba(139,92,246,.35)}
+    .logo h1{font-size:16px;margin:0;letter-spacing:.3px}
+    .beta{font-size:10px; padding:2px 6px; border-radius:999px; background:linear-gradient(135deg, rgba(139,92,246,.2), rgba(34,211,238,.2)); color:#b7b3c9}
+
+    .capabilities{border:1px solid var(--line); border-radius:14px; padding:14px; background:rgba(23,23,43,.6)}
+    .capabilities h2{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:#bdb8d2; margin:0 0 10px}
+    .capability{display:flex; align-items:center; justify-content:space-between; padding:10px 10px; border-radius:10px; background:var(--chip); margin-bottom:8px}
+    .capability label{display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none}
+    .capability svg{width:18px; height:18px; opacity:.9}
+    .switch{appearance:none; width:42px;height:24px;background:#313152;border-radius:999px; position:relative; outline:none; cursor:pointer; transition:.2s}
+    .switch:checked{background:linear-gradient(135deg, var(--brand), var(--brand-2))}
+    .switch:before{content:""; width:18px;height:18px; background:#fff; border-radius:50%; position:absolute; top:3px; left:3px; transition:.2s}
+    .switch:checked:before{left:21px}
+
+    .sidebar .foot{margin-top:auto; display:flex; gap:10px}
+    .btn{border:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); color:var(--ink); padding:10px 12px; border-radius:12px; cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+
+    .main{display:grid; grid-template-rows: auto auto 1fr auto; min-width:0}
+    .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line)}
+    .title{display:flex; align-items:center; gap:12px}
+    .title h2{margin:0; font-size:14px; color:#e8e6f2}
+    .title .chip{padding:6px 10px; border-radius:999px; background:rgba(139,92,246,.18); border:1px solid rgba(139,92,246,.35); color:#cdbbff; font-size:12px}
+
+    .actions{display:flex; gap:10px}
+    .actions .btn{display:flex; align-items:center; gap:8px}
+
+    .quick{padding:10px 18px; display:flex; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--line)}
+    .quick .q{padding:8px 10px; background:var(--chip); border:1px solid var(--line); border-radius:999px; cursor:pointer; font-size:12px; color:#d6d3e7}
+
+    .chat{padding:20px 18px; overflow:auto}
+    .msg{display:grid; grid-template-columns: 40px 1fr; gap:12px; margin-bottom:14px}
+    .avatar{width:40px;height:40px; border-radius:12px; background:linear-gradient(135deg, var(--brand), var(--brand-2)); display:grid; place-items:center; font-weight:800; color:#141322}
+    .avatar.user{background:#2a2a47; color:#bfc1ff}
+    .bubble{background:var(--card); border:1px solid var(--line); padding:14px; border-radius:14px; box-shadow:var(--shadow)}
+    .bubble p{margin:0 0 10px; line-height:1.55}
+    .bubble pre{background:#0f1020; color:#e8e6ff; border:1px solid #2a2a57; padding:12px; border-radius:12px; overflow:auto}
+    .bubble code{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+
+    .web-results{display:grid; gap:10px; margin-top:10px}
+    .result{background:#0f1020; border:1px solid #2a2a57; padding:12px; border-radius:12px}
+    .result h4{margin:0 0 6px; font-size:13px}
+    .result .meta{font-size:11px; color:#b9b6d1}
+    .result .snippet{font-size:13px; color:#e9e7ff; opacity:.9; margin-top:6px}
+
+    .composer{border-top:1px solid var(--line); padding:14px 18px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.0))}
+    .composer form{display:grid; grid-template-columns: 1fr auto; gap:10px}
+    .input-wrap{display:grid; gap:10px}
+    .row{display:flex; gap:10px; align-items:center}
+    .textarea{min-height:52px; max-height:180px; resize:vertical; width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
+    .subinput{flex:1; padding:10px 12px; border-radius:10px; border:1px dashed var(--line); background:#11112a; color:#d7d5ea}
+    .secondary{display:flex; gap:10px}
+    .iconbtn{width:44px;height:44px; border-radius:12px; display:grid; place-items:center; border:1px solid var(--line); background:var(--chip); cursor:pointer}
+    .send{padding:0 18px; border-radius:12px; border:1px solid var(--line); background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#0a0820; font-weight:800; letter-spacing:.3px}
+
+    .drop{border:1px dashed #414169; border-radius:12px; padding:10px; text-align:center; color:#bdbbe0; font-size:12px}
+
+    .hidden{display:none}
+
+    /* Settings modal */
+    .modal{position:fixed; inset:0; background:rgba(5,6,14,.65); display:none; align-items:center; justify-content:center}
+    .modal.visible{display:flex}
+    .modal .panel{width:min(720px, 92vw); background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:var(--shadow)}
+    .panel h3{margin:0 0 12px}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    .field{display:grid; gap:6px}
+    .field label{font-size:12px; color:#bdb8d3}
+    .field input, .field select{padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#0f1020; color:#fff}
+    .panel .row{justify-content:space-between}
+
+    /* Small screens */
+    @media (max-width: 1024px){
+      .app{grid-template-columns: 1fr}
+      .sidebar{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="mark"></div>
+        <div>
+          <h1>Nexus Web IA</h1>
+          <span class="beta">interface de IA com acesso à web</span>
+        </div>
+      </div>
+
+      <div class="capabilities">
+        <h2>Recursos</h2>
+        <div class="capability">
+          <label for="cap-web"> 
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0c3.5 0 6.4 4 6.4 9S15.5 21 12 21 5.6 17 5.6 12 8.5 3 12 3Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            Acesso à Web
+          </label>
+          <input id="cap-web" class="switch" type="checkbox" checked>
+        </div>
+        <div class="capability">
+          <label for="cap-news"> 
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h10M4 18h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Notícias recentes
+          </label>
+          <input id="cap-news" class="switch" type="checkbox">
+        </div>
+        <div class="capability">
+          <label for="cap-wiki"> 
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.2"/><path d="M7 9h10M7 12h10M7 15h8" stroke="currentColor" stroke-width="1.2"/></svg>
+            Wikipedia + Web geral
+          </label>
+          <input id="cap-wiki" class="switch" type="checkbox" checked>
+        </div>
+        <div class="capability">
+          <label for="cap-youtube"> 
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/><path d="M11 9v6l4-3-4-3Z" fill="currentColor"/></svg>
+            YouTube (transcrições)
+          </label>
+          <input id="cap-youtube" class="switch" type="checkbox">
+        </div>
+        <div class="capability">
+          <label for="cap-files"> 
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 4h5l3 3h4a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            PDFs / Arquivos
+          </label>
+          <input id="cap-files" class="switch" type="checkbox">
+        </div>
+        <div class="capability">
+          <label for="cap-sheets"> 
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.2"/></svg>
+            Google Sheets
+          </label>
+          <input id="cap-sheets" class="switch" type="checkbox">
+        </div>
+      </div>
+
+      <div class="capabilities">
+        <h2>Parâmetros</h2>
+        <div class="field">
+          <label for="max-web">Máx. resultados web</label>
+          <input id="max-web" type="number" min="1" max="12" value="6"/>
+        </div>
+        <div class="field">
+          <label for="web-depth">Profundidade de busca</label>
+          <select id="web-depth">
+            <option value="fast">Rápida</option>
+            <option value="balanced" selected>Equilibrada</option>
+            <option value="deep">Profunda</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="foot">
+        <button class="btn" id="btn-settings">Configurações</button>
+        <button class="btn" id="btn-clear">Limpar</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <span class="chip">Nova conversa</span>
+          <h2>Nexus Web • IA com Acesso Total</h2>
+        </div>
+        <div class="actions">
+          <button class="btn" id="btn-export">Exportar</button>
+          <button class="btn" id="btn-tts">Ler resposta</button>
+        </div>
+      </header>
+
+      <section class="quick" id="quick">
+        <button class="q" data-template="Pesquise o panorama mais recente sobre {tema}, cite 5 fontes confiáveis e a data de publicação.">Panorama + 5 fontes</button>
+        <button class="q" data-template="Leia e resuma criticamente a página: {url}. Traga citações e trechos importantes com as respectivas fontes.">Resumo de página</button>
+        <button class="q" data-template="Extraia os principais tópicos do vídeo {urlYouTube} e crie um resumo com timestamps.">Resumo de vídeo</button>
+        <button class="q" data-template="Compare as últimas notícias sobre {assunto} em 3 veículos diferentes e aponte divergências.">Comparar notícias</button>
+        <button class="q" data-template="Liste prós e contras de {produto/serviço} com base em reviews recentes e documentação oficial.">Prós × Contras</button>
+      </section>
+
+      <section id="chat" class="chat" aria-live="polite"></section>
+
+      <footer class="composer">
+        <form id="ask-form">
+          <div class="input-wrap">
+            <textarea id="prompt" class="textarea" placeholder="Pergunte qualquer coisa… (use / para comandos)" required></textarea>
+            <div class="row">
+              <input id="page-url" class="subinput" placeholder="URL opcional para a IA ler (site, PDF ou vídeo)" />
+              <div class="secondary">
+                <label class="iconbtn" title="Falar" id="btn-mic" aria-label="Gravar voz">
+                  <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor"/><path d="M12 19v2M7 13a5 5 0 0 0 10 0M5 19h14" stroke="currentColor"/></svg>
+                </label>
+                <label class="iconbtn" title="Anexar arquivo">
+                  <input id="file" type="file" class="hidden" multiple>
+                  <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M16.5 6.5 8.8 14.2a3 3 0 1 0 4.2 4.2l7-7a5 5 0 0 0-7-7l-9 9" stroke="currentColor"/></svg>
+                </label>
+              </div>
+            </div>
+            <div id="dropzone" class="drop">Arraste arquivos/links aqui • URLs serão lidas pelo servidor</div>
+          </div>
+          <button class="send" type="submit">Enviar</button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal" id="modal">
+    <div class="panel">
+      <div class="row">
+        <h3>Configurações</h3>
+        <button class="btn" id="btn-close">Fechar</button>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label>Endpoint do servidor (Vercel)</label>
+          <input id="server-url" placeholder="/api/ask" value="/api/ask" />
+        </div>
+        <div class="field">
+          <label>Modelo (server-side)</label>
+          <input id="model" placeholder="gpt-5" value="gpt-5" />
+        </div>
+        <div class="field">
+          <label>Idioma preferido</label>
+          <select id="lang">
+            <option value="pt-BR" selected>Português (Brasil)</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Voz (TTS do navegador)</label>
+          <select id="voice"></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="btn-ping">Testar conexão</button>
+        <span id="ping-result" style="color:#bdb8d3"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= Estado =========
+    const state = {
+      server: localStorage.getItem('nx.server') || '/api/ask',
+      model: localStorage.getItem('nx.model') || 'gpt-5',
+      lang: localStorage.getItem('nx.lang') || 'pt-BR',
+      tools: {
+        web: true, news: false, wiki: true, youtube: false, files: false, sheets: false,
+        maxWeb: Number(localStorage.getItem('nx.maxWeb') || 6), depth: localStorage.getItem('nx.depth') || 'balanced'
+      },
+      messages: JSON.parse(localStorage.getItem('nx.thread') || '[]'),
+      busy: false, ttsVoice: null
+    };
+
+    // ========= Helpers =========
+    const $ = sel => document.querySelector(sel);
+    const chat = $('#chat');
+    const promptEl = $('#prompt');
+    const fileEl = $('#file');
+    const urlEl = $('#page-url');
+    const drop = $('#dropzone');
+
+    function save(){
+      localStorage.setItem('nx.server', state.server);
+      localStorage.setItem('nx.model', state.model);
+      localStorage.setItem('nx.lang', state.lang);
+      localStorage.setItem('nx.maxWeb', String(state.tools.maxWeb));
+      localStorage.setItem('nx.depth', state.tools.depth);
+      localStorage.setItem('nx.thread', JSON.stringify(state.messages));
+    }
+
+    function time(){
+      const d = new Date();
+      return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function el(tag, attrs={}, children=[]) {
+      const e = document.createElement(tag);
+      Object.entries(attrs).forEach(([k,v])=>{
+        if(k === 'class') e.className = v; else if(k === 'html') e.innerHTML = v; else e.setAttribute(k, v);
+      });
+      for(const c of children) e.appendChild(c);
+      return e;
+    }
+
+    function messageEl(role, content){
+      const avatar = el('div', {class:'avatar ' + (role==='user'?'user':'')}, [
+        el('span', {html: role==='user'?'U':'IA'})
+      ]);
+      const bubble = el('div', {class:'bubble'});
+      bubble.appendChild(renderMarkdown(content));
+      const msg = el('div', {class:'msg'} , [avatar, bubble]);
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+      return bubble;
+    }
+
+    // Minimal Markdown-ish renderer (bold, code blocks, links)
+    function renderMarkdown(text){
+      const pre = document.createElement('div');
+      // Escape HTML
+      text = (text||'').replace(/[&<>]/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[s]));
+      // Code blocks
+      text = text.replace(/```([\s\S]*?)```/g, (m,code)=>`<pre><code>${code}</code></pre>`);
+      // Inline code
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Bold
+      text = text.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+      // Links
+      text = text.replace(/(https?:\/\/[^\s)]+)(?![^<]*>|[^<>]*<\/)/g, '<a href="$1" target="_blank" rel="noreferrer noopener">$1</a>');
+      // Paragraphs
+      text = text.split(/\n\n+/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+      pre.innerHTML = text;
+      // Enhance code blocks
+      pre.querySelectorAll('pre').forEach(preEl=>{
+        const btn = el('button', {class:'btn', style:'position:absolute; right:8px; top:8px; padding:4px 8px; font-size:12px'}, [document.createTextNode('Copiar')]);
+        const wrap = el('div', {style:'position:relative'});
+        preEl.parentNode.insertBefore(wrap, preEl);
+        wrap.appendChild(preEl);
+        wrap.appendChild(btn);
+        btn.addEventListener('click',()=>{
+          navigator.clipboard.writeText(preEl.innerText.trim());
+          btn.textContent = 'Copiado!';
+          setTimeout(()=>btn.textContent='Copiar', 1200);
+        })
+      });
+      return pre;
+    }
+
+    function webResultsEl(results){
+      const box = el('div', {class:'web-results'});
+      results.forEach(r=>{
+        const h = el('a', {href:r.url, target:'_blank', rel:'noreferrer noopener'});
+        const card = el('div', {class:'result'});
+        const t = el('h4', {html:r.title||r.url});
+        const meta = el('div', {class:'meta', html:`${(new URL(r.url)).hostname} • ${r.date||''}`});
+        const snip = el('div', {class:'snippet', html:r.snippet||''});
+        card.appendChild(t); card.appendChild(meta); card.appendChild(snip);
+        h.appendChild(card);
+        box.appendChild(h);
+      });
+      return box;
+    }
+
+    // ========= TTS =========
+    let voices = [];
+    function loadVoices(){
+      voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      const sel = $('#voice');
+      if(!sel) return;
+      sel.innerHTML = '';
+      voices.forEach((v,i)=>{
+        const opt = el('option', {value:i, html:`${v.name} (${v.lang})`});
+        if(v.lang.startsWith(state.lang)) opt.selected=true;
+        sel.appendChild(opt);
+      });
+    }
+    if('speechSynthesis' in window){
+      window.speechSynthesis.onvoiceschanged = loadVoices; loadVoices();
+    }
+
+    $('#btn-tts').addEventListener('click', ()=>{
+      const last = [...chat.querySelectorAll('.bubble')].pop();
+      if(!last) return;
+      const text = last.innerText.slice(0, 8000);
+      const u = new SpeechSynthesisUtterance(text);
+      const v = voices[$('#voice').value|0];
+      if(v) u.voice = v; u.lang = state.lang;
+      window.speechSynthesis.speak(u);
+    });
+
+    // ========= Mic (STT nativo do navegador) =========
+    let rec, listening=false;
+    $('#btn-mic').addEventListener('click', ()=>{
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR){ alert('Reconhecimento de voz não suportado neste navegador.'); return; }
+      if(!rec){ rec = new SR(); rec.lang = state.lang; rec.interimResults = true; rec.continuous=false; }
+      if(listening){ rec.stop(); return; }
+      listening=true; $('#btn-mic').style.borderColor = '#6ee7b7';
+      rec.start();
+      rec.onresult = (e)=>{
+        const t = Array.from(e.results).map(r=>r[0].transcript).join('');
+        promptEl.value = t;
+      }
+      rec.onend = ()=>{ listening=false; $('#btn-mic').style.borderColor='var(--line)'; };
+    });
+
+    // ========= UI Bindings =========
+    // Sidebar toggles
+    $('#cap-web').checked = state.tools.web; $('#cap-news').checked = state.tools.news; $('#cap-wiki').checked = state.tools.wiki; $('#cap-youtube').checked = state.tools.youtube; $('#cap-files').checked = state.tools.files; $('#cap-sheets').checked = state.tools.sheets;
+    $('#max-web').value = state.tools.maxWeb; $('#web-depth').value = state.tools.depth;
+
+    $('#cap-web').onchange = e=> state.tools.web = e.target.checked;
+    $('#cap-news').onchange = e=> state.tools.news = e.target.checked;
+    $('#cap-wiki').onchange = e=> state.tools.wiki = e.target.checked;
+    $('#cap-youtube').onchange = e=> state.tools.youtube = e.target.checked;
+    $('#cap-files').onchange = e=> state.tools.files = e.target.checked;
+    $('#cap-sheets').onchange = e=> state.tools.sheets = e.target.checked;
+    $('#max-web').oninput = e=> state.tools.maxWeb = Number(e.target.value);
+    $('#web-depth').oninput = e=> state.tools.depth = e.target.value;
+
+    // Settings modal
+    const modal = $('#modal');
+    $('#btn-settings').onclick = ()=>{ $('#server-url').value = state.server; $('#model').value = state.model; $('#lang').value = state.lang; modal.classList.add('visible'); };
+    $('#btn-close').onclick = ()=>{ modal.classList.remove('visible'); };
+    $('#server-url').onchange = e=> state.server = e.target.value || '/api/ask';
+    $('#model').onchange = e=> state.model = e.target.value || 'gpt-5';
+    $('#lang').onchange = e=> state.lang = e.target.value || 'pt-BR';
+    $('#btn-ping').onclick = async()=>{
+      $('#ping-result').textContent = 'testando…';
+      try{
+        const r = await fetch(state.server + '?ping=1');
+        $('#ping-result').textContent = r.ok ? 'OK' : 'Falhou ('+r.status+')';
+      }catch(err){ $('#ping-result').textContent = 'Erro de rede'; }
+    }
+
+    // Quick templates
+    $('#quick').addEventListener('click', (e)=>{
+      const b = e.target.closest('button.q'); if(!b) return;
+      const t = b.dataset.template || ''; promptEl.value = t; promptEl.focus();
+    });
+
+    // Export / Clear
+    $('#btn-export').onclick = ()=>{
+      const blob = new Blob([JSON.stringify({createdAt: new Date().toISOString(), messages: state.messages}, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = el('a', {href:url, download:'nexus-thread.json'}); document.body.appendChild(a); a.click(); a.remove();
+    }
+    $('#btn-clear').onclick = ()=>{ if(confirm('Limpar conversa atual?')){ state.messages = []; chat.innerHTML=''; save(); } }
+
+    // Drag & Drop
+    ;['dragenter','dragover','dragleave','drop'].forEach(evt=>drop.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); }));
+    drop.addEventListener('drop', e=>{
+      const dt = e.dataTransfer; if(!dt) return;
+      const url = dt.getData('text/uri-list') || dt.getData('text/plain');
+      if(url && /^https?:\/\//.test(url)){ urlEl.value = url; return; }
+      if(dt.files && dt.files.length){ fileEl.files = dt.files; }
+    });
+
+    // ========= Envio ao servidor =========
+    $('#ask-form').addEventListener('submit', async (e)=>{
+      e.preventDefault(); if(state.busy) return; state.busy=true;
+      const content = promptEl.value.trim(); if(!content) { state.busy=false; return; }
+      const url = (urlEl.value||'').trim();
+      const files = fileEl.files ? Array.from(fileEl.files) : [];
+
+      // Render user message
+      messageEl('user', content + (url? `\n\nURL: ${url}`:''));
+      state.messages.push({role:'user', content, url});
+      save();
+
+      // Typing placeholder
+      const bubble = messageEl('assistant', '');
+      let streamingText = '';
+
+      try{
+        const payload = {
+          model: state.model,
+          messages: state.messages,
+          tools: {
+            web: state.tools.web,
+            news: state.tools.news,
+            wiki: state.tools.wiki,
+            youtube: state.tools.youtube,
+            files: state.tools.files,
+            sheets: state.tools.sheets,
+            max_web_results: state.tools.maxWeb,
+            depth: state.tools.depth,
+            lang: state.lang
+          },
+          url: url || null
+        };
+
+        const hasFiles = files.length>0;
+        let res;
+        if(hasFiles){
+          const form = new FormData();
+          form.append('payload', new Blob([JSON.stringify(payload)], {type:'application/json'}));
+          files.forEach((f,i)=> form.append('file'+i, f));
+          res = await fetch(state.server, {method:'POST', body:form});
+        } else {
+          res = await fetch(state.server, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'text/event-stream'}, body: JSON.stringify(payload)});
+        }
+
+        const ctype = (res.headers.get('content-type')||'').toLowerCase();
+        if(ctype.includes('text/event-stream') || (res.body && res.body.getReader)){
+          // Stream tokens / SSE or chunked text
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while(true){
+            const {done, value} = await reader.read(); if(done) break;
+            buffer += decoder.decode(value, {stream:true});
+            // Try to parse SSE lines
+            const parts = buffer.split(/\n\n/);
+            buffer = parts.pop();
+            for(const part of parts){
+              const lines = part.split(/\n/).filter(Boolean);
+              for(const line of lines){
+                if(line.startsWith('data:')){
+                  const data = line.slice(5).trim();
+                  try{
+                    const j = JSON.parse(data);
+                    if(j.type==='web_results' && Array.isArray(j.items)){
+                      bubble.appendChild(webResultsEl(j.items));
+                    } else if(j.type==='meta' && j.thinking){ /* ignore visual */ }
+                    else if(j.type==='done'){ /* ignore */ }
+                    else if(j.delta){ streamingText += j.delta; bubble.appendChild(renderMarkdown(j.delta)); }
+                  }catch{
+                    // Treat as plain token
+                    streamingText += data;
+                    bubble.appendChild(renderMarkdown(data));
+                  }
+                } else {
+                  // Fallback: append raw
+                  streamingText += line + '\n';
+                  bubble.appendChild(renderMarkdown(line+'\n'));
+                }
+                chat.scrollTop = chat.scrollHeight;
+              }
+            }
+          }
+        } else if(ctype.includes('application/json')){
+          const j = await res.json();
+          streamingText = j.answer || '';
+          bubble.appendChild(renderMarkdown(streamingText||'(vazio)'));
+          if(Array.isArray(j.web_results) && j.web_results.length){
+            bubble.appendChild(webResultsEl(j.web_results));
+          }
+        } else {
+          const text = await res.text();
+          streamingText = text;
+          bubble.appendChild(renderMarkdown(text));
+        }
+
+        // Save assistant turn
+        state.messages.push({role:'assistant', content: streamingText}); save();
+      } catch(err){
+        bubble.appendChild(renderMarkdown('⚠️ **Erro** ao consultar o servidor: '+ (err?.message||err)));
+      } finally {
+        state.busy=false; promptEl.value=''; urlEl.value=''; fileEl.value='';
+      }
+    });
+
+    // Bootstrap: render previous messages
+    if(state.messages.length===0){
+      messageEl('assistant', 'Olá! Eu sou a **Nexus Web IA**. Posso pesquisar na internet, ler páginas e PDFs, analisar vídeos do YouTube e planilhas — tudo via seu backend seguro (*/api/ask*).\n\nAtive os recursos na barra esquerda e mande sua primeira pergunta.');
+    } else {
+      for(const m of state.messages){ messageEl(m.role, m.content); }
+    }
+
+    // Keyboard helpers
+    promptEl.addEventListener('keydown', e=>{
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); $('#ask-form').requestSubmit(); }
+    });
+
+    // Persist settings on unload
+    window.addEventListener('beforeunload', save);
+  </script>
+
+  <!--
+  ──────────────────────────────────────────────────────────────────────────
+  COMO CONECTAR O BACKEND (/api/ask)
+  ──────────────────────────────────────────────────────────────────────────
+  • Implemente no servidor (Vercel) um endpoint POST /api/ask que aceite:
+      - JSON (ou multipart/form-data quando houver arquivos)
+      - Corpo: {
+          model: "gpt-5",
+          messages: [{role, content, url?}],
+          tools: { web, news, wiki, youtube, files, sheets, max_web_results, depth, lang },
+          url: string|null
+        }
+  • O servidor pode:
+      1) Responder com `Content-Type: text/event-stream` (SSE) emitindo eventos
+         "data: {\"delta\": \"texto\"}\n\n" para stream de tokens e
+         opcionalmente "data: {\"type\":\"web_results\",\"items\": [...]}\n\n".
+      2) OU responder JSON: { answer: string, web_results?: [{title,url,snippet,date}] }.
+
+  • Nunca exponha chaves da OpenAI nem de buscadores no front-end. Faça toda
+    a navegação/busca/leitura de páginas no backend.
+  • Para leitura de URLs/PDFs/YouTube: o backend deve fazer o fetch, extrair texto
+    (ex.: Readability, PDF parsers, transcrição), e mandar trechos citáveis.
+  • Para Google Sheets / Apps Script: valide no servidor e retorne somente o que
+    o usuário pode ver. Opcional: aplique cache por URL.
+  → Este index já trata os dois modos (SSE ou JSON) e renderiza cartões de fontes.
+  → Ajuste livremente os nomes de campos se seu backend usar chaves diferentes.
+  -->
+</body>
+</html>
